@@ -1,4 +1,4 @@
-use v5.10.0;
+use strict;
 use warnings;
 
 package JMAP::Tester;
@@ -25,6 +25,12 @@ use URI::QueryParam;
 use URI::Escape qw(uri_escape);
 
 use namespace::clean;
+
+sub defined_or {
+  my ($what, $or) = @_;
+
+  defined $what ? $what : $or;
+}
 
 =head1 OVERVIEW
 
@@ -140,7 +146,7 @@ sub _set_cookie {
     $name,
     $value,
     '/',
-    $arg->{domain} // $uri->host,
+    defined_or($arg->{domain}, $uri->host),
     $uri->port,
     0,
     ($uri->port == 443 ? 1 : 0),
@@ -263,13 +269,14 @@ C<munge_method_triple>, which can tweak the method however it likes.
 
 =cut
 
+my $ident = 'a';
+
 sub request {
   my ($self, $input_request) = @_;
 
   Carp::confess("can't perform request: no api_uri configured")
     unless $self->has_api_uri;
 
-  state $ident = 'a';
   my %seen;
   my @suffixed;
 
@@ -291,7 +298,7 @@ sub request {
 
     my %arg = (
       %default_args,
-      %{ $copy->[1] // {} },
+      %{ defined_or($copy->[1], {}) },
     );
 
     for my $key (keys %arg) {
@@ -407,7 +414,7 @@ has _logger => (
       Module::Runtime::require_module($class);
 
       return $class->new({
-        writer => $filename // 'jmap-tester-{T}-{PID}.log'
+        writer => defined_or($filename, 'jmap-tester-{T}-{PID}.log'),
       });
     }
 
@@ -534,7 +541,7 @@ sub download_uri_for {
 
   for my $param (qw(blobId accountId name type)) {
     next unless $uri =~ /\{$param\}/;
-    my $value = $arg->{ $param } // $DL_DEFAULT{ $param };
+    my $value = defined_or($arg->{ $param }, $DL_DEFAULT{ $param });
 
     Carp::confess("missing required template parameter $param")
       unless defined $value;
@@ -672,7 +679,7 @@ sub simple_auth {
   my $start_json = $self->json_encode({
     username      => $username,
     clientName    => (ref $self),
-    clientVersion => $self->VERSION // '0',
+    clientVersion => defined_or($self->VERSION, '0'),
     deviceName    => 'JMAP Testing Client',
   });
 
@@ -743,7 +750,7 @@ configure the tester's target URIs and signing keys.
 
 sub update_client_session {
   my ($self, $auth_uri) = @_;
-  $auth_uri //= $self->authentication_uri;
+  $auth_uri = $self->authentication_uri unless defined $auth_uri;
 
   my $auth_res = $self->ua->get(
     $auth_uri,

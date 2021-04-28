@@ -1,4 +1,4 @@
-use v5.10.0;
+use strict;
 package JMAP::Tester::Response::Sentence::Set;
 # ABSTRACT: the kind of sentence you get in reply to a setFoos call
 
@@ -9,6 +9,12 @@ use Data::Dumper ();
 use JMAP::Tester::Abort 'abort';
 
 use namespace::clean;
+
+sub defined_or {
+  my ($what, $or) = @_;
+
+  defined $what ? $what : $or;
+}
 
 =head1 OVERVIEW
 
@@ -85,7 +91,7 @@ This returns a hashref mapping object ids to error properties.
 
 sub as_set { $_[0] }
 
-sub created { $_[0]->arguments->{created} // {} }
+sub created { defined_or($_[0]->arguments->{created}, {}); }
 
 sub created_id {
   my ($self, $creation_id) = @_;
@@ -103,7 +109,7 @@ sub created_ids {
 
 sub updated_ids   {
   my ($self) = @_;
-  my $updated = $_[0]{arguments}{updated} // {};
+  my $updated = defined_or($_[0]{arguments}{updated}, {});
 
   if (ref $updated eq 'ARRAY') {
     return @$updated;
@@ -115,7 +121,7 @@ sub updated_ids   {
 sub updated {
   my ($self) = @_;
 
-  my $updated = $_[0]{arguments}{updated} // {};
+  my $updated = defined_or($_[0]{arguments}{updated}, {});
 
   if (ref $updated eq 'ARRAY') {
     return { map {; $_ => undef } @$updated };
@@ -132,9 +138,9 @@ sub not_created_ids   { keys %{ $_[0]{arguments}{notCreated} }   }
 sub not_updated_ids   { keys %{ $_[0]{arguments}{notUpdated} }   }
 sub not_destroyed_ids { keys %{ $_[0]{arguments}{notDestroyed} } }
 
-sub create_errors     { $_[0]{arguments}{notCreated}   // {} }
-sub update_errors     { $_[0]{arguments}{notUpdated}   // {} }
-sub destroy_errors    { $_[0]{arguments}{notDestroyed} // {} }
+sub create_errors     { defined_or($_[0]{arguments}{notCreated}, {});   }
+sub update_errors     { defined_or($_[0]{arguments}{notUpdated}, {});   }
+sub destroy_errors    { defined_or($_[0]{arguments}{notDestroyed}, {}); }
 
 sub assert_no_errors {
   my ($self) = @_;

@@ -1,4 +1,4 @@
-use v5.10.0;
+use strict;
 package JMAP::Tester::SentenceBroker;
 
 use Moo;
@@ -34,8 +34,10 @@ sub paragraph_for_items {
 
 sub abort_callback { \&abort }
 
+my $typist;
+
 sub strip_json_types {
-  state $typist = JSON::Typist->new;
+  $typist = JSON::Typist->new unless $typist;
   $typist->strip_types($_[1]);
 }
 

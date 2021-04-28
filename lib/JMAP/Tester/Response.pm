@@ -1,4 +1,4 @@
-use v5.10.0;
+use strict;
 
 package JMAP::Tester::Response;
 # ABSTRACT: what you get in reply to a succesful JMAP request
@@ -40,8 +40,10 @@ sub add_items {
   $_[0]->sentence_broker->abort_callback->("can't add items to " . __PACKAGE__);
 }
 
+my $BROKER;
+
 sub sentence_broker {
-  state $BROKER = JMAP::Tester::SentenceBroker->new;
+  $BROKER = JMAP::Tester::SentenceBroker->new unless $BROKER;
 }
 
 1;

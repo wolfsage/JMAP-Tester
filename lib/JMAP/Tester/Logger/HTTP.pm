@@ -1,4 +1,4 @@
-use 5.14.0;
+use strict;
 package JMAP::Tester::Logger::HTTP;
 
 use Moo;

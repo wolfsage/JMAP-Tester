@@ -46,7 +46,10 @@ use namespace::clean;
     my ($self) = @_;
     return $self->_handle if $self->_pid == $$;
 
-    my $fn = $self->filename_template =~ s/\{T\}/$^T/gr =~ s/\{PID\}/$$/gr;
+    my $fn = $self->filename_template;
+    $fn =~ s/\{T\}/$^T/g;
+    $fn =~ s/\{PID\}/$$/g;
+
     open my $fh, '>>', $fn or Carp::confess("can't open $fn for writing: $!");
 
     $fh->autoflush(1);

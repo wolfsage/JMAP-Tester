@@ -1,4 +1,3 @@
-use v5.10.0;
 use strict;
 
 package JMAP::Tester::Result::Upload;

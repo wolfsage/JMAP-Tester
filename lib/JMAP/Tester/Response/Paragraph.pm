@@ -1,4 +1,4 @@
-use v5.10.0;
+use strict;
 package JMAP::Tester::Response::Paragraph;
 # ABSTRACT: a group of sentences in a JMAP response
 
